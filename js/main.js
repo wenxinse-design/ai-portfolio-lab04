@@ -128,6 +128,46 @@ function syncInitialHash() {
   );
 }
 
+const THEME_STORAGE_KEY = "portfolio-theme";
+
+function applyTheme(theme) {
+  const isLight = theme === "light";
+  document.documentElement.setAttribute("data-theme", isLight ? "light" : "dark");
+
+  const toggle = document.querySelector("#themeToggle");
+  if (!toggle) return;
+
+  toggle.setAttribute("aria-pressed", String(isLight));
+  const icon = toggle.querySelector(".theme-toggle__icon");
+  const label = toggle.querySelector(".theme-toggle__label");
+  if (icon) icon.textContent = isLight ? "☀" : "☾";
+  if (label) label.textContent = isLight ? "LIGHT" : "DARK";
+}
+
+function setupThemeToggle() {
+  const toggle = document.querySelector("#themeToggle");
+  if (!toggle) return;
+
+  let storedTheme = null;
+  try {
+    storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (error) {
+    storedTheme = null;
+  }
+  applyTheme(storedTheme === "light" ? "light" : "dark");
+
+  toggle.addEventListener("click", () => {
+    const nextTheme =
+      document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+    applyTheme(nextTheme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {
+      /* localStorage 不可用时仅切换当前页主题，不影响浏览 */
+    }
+  });
+}
+
 function setupProjectReveal() {
   const panels = [...document.querySelectorAll(".project-panel")];
 
@@ -150,6 +190,7 @@ function setupProjectReveal() {
 }
 
 renderProjects();
+setupThemeToggle();
 setupNavState();
 setupNavLinks();
 setupProjectReveal();
